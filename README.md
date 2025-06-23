@@ -2,7 +2,7 @@
 
 Based on the freesound API on https://github.com/MTG/freesound-python
 
-
+DISCLAIMER: be careful about prompt-injection, there is no input sanitization or validation
 
 ## MCP config
 ### Dependencies

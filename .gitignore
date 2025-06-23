@@ -1,3 +1,6 @@
+.env
+sounds/*
+*.lock
 build
 *.pyc
 *.bak

@@ -1,10 +1,14 @@
-[tool.yapf]
-based_on_style = "google"
-spaces_before_comment = 4
-split_before_logical_operator = true
-split_before_expression_after_opening_paren = true
-split_before_first_argument = true
-dedent_closing_brackets = true
-coalesce_brackets = true
-column_limit = 120
-align_closing_bracket_with_visual_indent = true
+[project]
+name = "mcp-freesound"
+version = "0.1.0"
+requires-python = ">=3.13"
+dependencies = [
+    "requests",
+    "fastapi[standard]>=0.115.12",
+    "mcp[cli]>=1.8.1",
+    "httpx>=0.28.1",
+    "uvicorn>=0.34.2",
+	"python-osc>=1.9.3",
+    "ffmpeg-python",
+    "dotenv",
+]

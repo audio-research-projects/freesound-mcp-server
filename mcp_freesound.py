@@ -4,7 +4,7 @@ import json
 import os
 from dotenv import load_dotenv
 import freesound
-import MIRState
+from MIRState import *
 from typing import Any
 
 # Load .env file at module level (before any other code)
@@ -39,21 +39,51 @@ def format_sound(sound: dict[str, Any]) -> str:
         Name: {sound.name}
         Username: {sound.username}
        """
-        # Preview : {sound.get("previews", "Unknown")}
 
 @mcp.tool()
 async def get_freesound_search_by_content(sound_content_description: str) -> str:
         """ search a sound in freesound using a content descritpion"""
         results = freesound_client.text_search(query=sound_content_description,fields="id,name,username")
-        info_txt = "Num results:"+str(results.count)
+        info_txt = "Number of results:"+str(results.count)
+        sounds = [format_sound(sound) for sound in results]
+        return info_txt+"\n---\n".join(sounds)
+
+@mcp.tool()
+async def get_freesound_search_by_mir_features(sound_mir_features_description: str) -> str:
+        """
+            Search for Freesound audio clips based on MIR (Music Information Retrieval) feature filters.
+
+            The function expects a string representing a dictionary of MIR descriptors.
+            Each key should be one of the supported MIR features, and values must be numbers.
+
+            Supported descriptors include:
+                - "duration": max duration in seconds
+                - "bpm": beats per minute
+                - "hfc.mean": high-frequency content mean
+                - "spectral_complexity.mean"
+                - "spectral_centroid.mean" 
+                - "pitch.mean"
+                - "pitch_centroid.mean"
+                - "pitch_salience.mean"
+                - "inharmonicity.mean"
+                - "dissonance.mean"
+                - "chords_strength.mean"
+
+            All the .mean values are in 0..1 float range.     
+
+            Example usage (stringified dictionary):
+                get_freesound_search_by_mir_features("{'duration': 30, 'dissonance.mean': 0.7}")
+
+            This will return a summary of matched Freesound results.
+        """
+        results = freesound_client.text_search(query=sound_mir_features_description,fields="id,name,username")
+        info_txt = "Number of results:"+str(results.count)
         sounds = [format_sound(sound) for sound in results]
         return info_txt+"\n---\n".join(sounds)
         
-# @mcp.tool()
-# async def get_freesound_mir_search(sound_description: str) -> str:
-#     """ Get freesound sound from a sound description based in descriptors """
+        # mir_state = MIRState()
 
-#     mir_state = MIRState()
+        # mir_state.set_desc("")
 #     mir_state
 
 #     # desc_filter = "lowlevel.pitch.var:[* TO 20]" 

@@ -86,5 +86,29 @@ def convert_to_wav(input_path: str) -> str:
         raise RuntimeError(f"ffmpeg conversion failed: {e.stderr.decode()}")
     return output_path
 
+@mcp.tool()
+async def get_freesound_descriptor(sound_id: str, descriptor: str) -> str:
+    """
+    Get a specific analysis descriptor from a Freesound sound by its id and descriptor path.
+    Example: get_freesound_descriptor('12345', 'lowlevel.spectral_centroid')
+    See all possible descriptors at https://freesound.org/docs/api/analysis_docs.html
+    """
+    try:
+        # Request all analysis data for the sound
+        sound = freesound_client.get_sound(int(sound_id), fields="id,name,analysis", normalized=1)
+        analysis = sound.get_analysis()
+        # Traverse the descriptor path (e.g., 'lowlevel.spectral_centroid')
+        parts = descriptor.split('.')
+        obj = analysis
+        for part in parts:
+            obj = getattr(obj, part)
+        # If the final object has as_dict(), use it
+        if hasattr(obj, 'as_dict'):
+            return str(obj.as_dict())
+        # Otherwise, just return its string representation
+        return str(obj)
+    except Exception as e:
+        return f"Error retrieving descriptor '{descriptor}' for sound {sound_id}: {e}"
+
 if __name__ == "__main__":
     mcp.run(transport="stdio")

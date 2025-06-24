@@ -22,6 +22,14 @@ if api_key is None:
 freesound_client = freesound.FreesoundClient()
 freesound_client.set_token(api_key)
 
+def format_sound(sound: dict[str, Any]) -> str:
+    """Format a sound instance into a readable string."""
+    return f"""
+        id: {sound.id}
+        Name: {sound.name}
+        Username: {sound.username}
+       """
+
 @mcp.tool()
 async def get_freesound_basic_info(sound_id: str) -> str:
     """ Get freesound sound info for id """
@@ -32,14 +40,6 @@ async def get_freesound_basic_info(sound_id: str) -> str:
     info_txt += "Tags:" + " ".join(sound.tags)
     return info_txt
 
-def format_sound(sound: dict[str, Any]) -> str:
-    """Format a sound instance into a readable string."""
-    return f"""
-        id: {sound.id}
-        Name: {sound.name}
-        Username: {sound.username}
-       """
-
 @mcp.tool()
 async def get_freesound_search_by_content(sound_content_description: str) -> str:
         """ search a sound in freesound using a content descritpion"""
@@ -47,6 +47,52 @@ async def get_freesound_search_by_content(sound_content_description: str) -> str
         info_txt = "Number of results:"+str(results.count)
         sounds = [format_sound(sound) for sound in results]
         return info_txt+"\n---\n".join(sounds)
+
+@mcp.tool()
+async def get_freesound_descriptor(sound_id: str, descriptor: str) -> str:
+    """
+    Get a specific analysis descriptor from a Freesound sound by its id and descriptor path.
+    Example: get_freesound_descriptor('12345', 'lowlevel.spectral_centroid')
+    See all possible descriptors at https://freesound.org/docs/api/analysis_docs.html
+    """
+    try:
+        # Request all analysis data for the sound
+        sound = freesound_client.get_sound(int(sound_id), fields="id,name,analysis", normalized=1)
+        analysis = sound.get_analysis()
+        # Traverse the descriptor path (e.g., 'lowlevel.spectral_centroid')
+        parts = descriptor.split('.')
+        obj = analysis
+        for part in parts:
+            obj = getattr(obj, part)
+        # If the final object has as_dict(), use it
+        if hasattr(obj, 'as_dict'):
+            return str(obj.as_dict())
+        # Otherwise, just return its string representation
+        return str(obj)
+    except Exception as e:
+        return f"Error retrieving descriptor '{descriptor}' for sound {sound_id}: {e}"
+    
+@mcp.tool()
+async def get_freesound_full_sound_analysis(sound_id: str) -> str:
+        """
+            Get a complete sound analysis from a sound from freesound using its id as input
+            Results are normalized by default. To avoid normalization, use normalized=0
+        """
+
+        sound = freesound_client.get_sound(int(sound_id), fields="id,name,username,duration,analysis", descriptors="lowlevel.spectral_centroid", normalized=1)
+# print("Getting sound:", sound.name)
+# print("Username:", sound.username)
+# print("Duration:", str(sound.duration), "(s)")
+# print("Spectral centroid:",)
+# print(sound.analysis.lowlevel.spectral_centroid.as_dict())
+# print()
+
+# Get sound analysis example
+# print("Get analysis:")
+# print("-------------")
+        analysis = sound.get_analysis()
+
+        return str(analysis.as_dict())
 
 @mcp.tool()
 async def get_freesound_search_by_mir_features(sound_mir_features_description: str) -> str:

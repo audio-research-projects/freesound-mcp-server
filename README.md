@@ -33,6 +33,8 @@ First improve the prompt, LLMs + MCP to iterate the search for sounds in the sou
 
     FREESOUND_API_KEY=
 
+Request one here https://freesound.org/home/login/?next=/apiv2/apply
+
 ### Edit your llm config file like this
 
 For exmple ~/Library/Application\ Support/Claude/claude_desktop_config.json
